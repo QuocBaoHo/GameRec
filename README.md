@@ -1,6 +1,6 @@
 # 🚀 Steam AI Recommender Pro (Overkill Edition)
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge.svg)](https://streamlit.io/)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://streamlit.io/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![AI Model](https://img.shields.io/badge/AI-all--MiniLM--L6--v2-green.svg)](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
 
@@ -27,7 +27,7 @@ Dự án được thiết kế với tư duy "Overkill" - vượt xa các hệ t
 *   **Real-time Steam API:** Tự động lấy dữ liệu giá tiền (VNĐ), % Khuyến mãi và Ảnh bìa trực tiếp từ máy chủ Steam theo thời gian thực.
 *   **Diversity Quota (Bộ lọc Đa dạng hóa):** Khắc phục triệt để hiện tượng "Bong bóng lọc" (Echo Chamber) bằng cách:
     *   🔵 Giới hạn tối đa 2 slot cho game cùng IP/Franchise.
-    *   � Ưu tiên tối thiểu 3 slot cho các tựa game mới lạ, độc lập.
+    *   🟢 Ưu tiên tối thiểu 3 slot cho các tựa game mới lạ, độc lập.
 
 ### 2. Phân hệ Phân tích: `superAnalyse.py` (Bảng điều khiển AI)
 *   **Score Drop-off Chart:** Đo lường mức độ "đuối sức" của thuật toán khi tìm kiếm đến Top 50.
@@ -61,7 +61,7 @@ $$\text{sim}(A, B) = \cos(\theta) = \frac{A \cdot B}{||A|| ||B||}$$
 
 ---
 
-## � Cấu trúc Dự án
+## 📂 Cấu trúc Dự án
 
 ```text
 d:\GameRec/
