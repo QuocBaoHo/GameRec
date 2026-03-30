@@ -30,7 +30,21 @@ st.markdown("""
     div[data-testid="stImage"] img { border: 2px solid #30363d; border-radius: 8px; transition: transform 0.2s; }
     div[data-testid="stImage"] img:hover { transform: scale(1.03); border-color: #58a6ff; box-shadow: 0 0 10px #58a6ff; }
     .stProgress > div > div > div > div { background-color: #58a6ff; }
-    div[data-testid="stAlert"] { background-color: #161b22; border-left: 4px solid #58a6ff; color: #e6edf3 !important; }
+    /* 🛠️ FIX MÙ MẮT: Khung Info/Success Box */
+    div[data-testid="stAlert"] { 
+        background-color: #161b22 !important; 
+        border-left: 4px solid #58a6ff !important; 
+    }
+    /* Lệnh càn quét: Ép mọi chữ, mọi thẻ bên trong thành màu Trắng Sáng */
+    div[data-testid="stAlert"] * {
+        color: #f0f6fc !important; 
+        font-size: 1.05rem !important;
+        line-height: 1.6 !important;
+    }
+    /* Đổi màu mấy cái Bullet Point (dấu chấm tròn) cho đồng bộ */
+    div[data-testid="stAlert"] li {
+        color: #f0f6fc !important;
+    }
     table { color: #ffffff !important; }
     th { color: #58a6ff !important; }
     

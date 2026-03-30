@@ -1,59 +1,111 @@
-# 🚀 Steam AI Recommender Pro
+# 🚀 Steam AI Recommender Pro (Overkill Edition)
 
-Hệ thống gợi ý game Steam ứng dụng Trí tuệ Nhân tạo (AI) và Xử lý Ngôn ngữ Tự nhiên (NLP). Khác với các hệ thống truyền thống chỉ so khớp từ khóa (Lexical Matching), dự án này sử dụng Mô hình Ngôn ngữ Lớn (LLM) để hiểu ngữ nghĩa và đề xuất game dựa trên "Vibe" (Không khí/Trải nghiệm cốt truyện).
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge.svg)](https://streamlit.io/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![AI Model](https://img.shields.io/badge/AI-all--MiniLM--L6--v2-green.svg)](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
 
----
-
-## ✨ Tính năng nổi bật
-* **Real-time Steam API:** Cập nhật giá tiền (VNĐ), khuyến mãi và ảnh bìa trực tiếp từ máy chủ Steam.
-* **Semantic Search (LLM + FAISS):** Gợi ý game dựa trên sự tương đồng về ngữ nghĩa cốt truyện, không phụ thuộc vào Tags.
-* **Diversity Quota (Bộ lọc Đa dạng hóa):** Chống lại hiện tượng "Echo Chamber" (Gợi ý loanh quanh các phần 1, 2, 3 của cùng một game) bằng cách ép thuật toán phân bổ tối đa 2 slot cho IP cũ (🔵) và tối thiểu 3 slot cho các IP hoàn toàn mới (🟢).
+Hệ thống gợi ý game Steam thế hệ mới ứng dụng **Trí tuệ Nhân tạo (AI)** và **Xử lý Ngôn ngữ Tự nhiên (NLP)**. Dự án không chỉ dừng lại ở việc tạo ra một ứng dụng thực tế cho Game thủ, mà còn cung cấp một Bảng điều khiển Phân tích Dữ liệu (Analytics Dashboard) chuyên sâu để chứng minh sự vượt trội của AI so với các thuật toán cổ điển.
 
 ---
 
-## 🧠 Giải phẫu 4 Thuật toán Gợi ý
-
-Dự án là một đấu trường so sánh trực tiếp giữa 3 mô hình Cổ điển (Dựa trên Thống kê/Từ khóa) và 1 mô hình Hiện đại (Dựa trên Ngôn ngữ học sâu):
-
-### 1. Bag of Words (BoW)
-* **Cách hoạt động:** Biến đoạn mô tả game thành một cái túi đựng từ. Nó chỉ đếm xem một từ xuất hiện bao nhiêu lần, hoàn toàn phớt lờ ngữ pháp hay thứ tự từ.
-* **Điểm yếu:** Đếm từ mù quáng. Hai game có cùng chữ "Gun" nhiều lần sẽ bị coi là giống nhau, dù một game là bắn súng sinh tồn, một game là bắn súng nhịp điệu.
-
-### 2. Jaccard Similarity (Đếm Tags)
-* **Cách hoạt động:** Thuật toán so sánh tập hợp. Nó lấy số lượng Tags chung của 2 game chia cho tổng số Tags của cả 2 game.
-* **Điểm yếu:** Phụ thuộc 100% vào việc người dùng dán nhãn (Tag) trên Steam. Dễ bị đánh lừa bởi các game spam Tag (Ví dụ: Game xếp hình nhưng gắn mác "Cyberpunk", "RPG").
-
-### 3. TF-IDF + KNN
-* **Cách hoạt động:** Bản nâng cấp của BoW. Nó phạt những từ xuất hiện quá nhiều (như "the", "and", "game") và thưởng điểm cho những từ hiếm, mang tính đặc trưng cao (như "post-apocalyptic", "mutant"). Sau đó dùng thuật toán K-Nearest Neighbors (KNN) để tìm các game gần nhất.
-* **Điểm yếu:** Vẫn là so khớp mặt chữ (Lexical). Nếu Game A dùng từ "Zombie" và Game B dùng từ "Undead", TF-IDF sẽ chấm điểm tương đồng là 0 vì hai chữ này viết khác nhau.
-
-### 4. LLM + FAISS (AI Chân ái)
-* **Cách hoạt động:** Dùng mô hình Transformer (`all-MiniLM-L6-v2`) nén toàn bộ mô tả, thể loại, và cốt truyện của game thành một Vector đặc 384 chiều. Nó hiểu được ngữ cảnh và từ đồng nghĩa. FAISS của Meta được dùng để quét cực nhanh trong không gian nhiều chiều này.
-* **Điểm mạnh:** Hiểu được "Zombie" và "Undead" là cùng một chủ đề. Gợi ý chuẩn xác dựa trên trải nghiệm thực sự (Vibe) thay vì cái mác bên ngoài.
+## 📌 Mục lục
+- [✨ Tính năng Nổi bật](#-tính-năng-nổi-bật)
+- [🛠️ Công nghệ Sử dụng](#-công-nghệ-sử-dụng)
+- [🧠 Cơ sở Toán học & Thuật toán](#-cơ-sở-toán-học--thuật-toán)
+- [📂 Cấu trúc Dự án](#-cấu-trúc-dự-án)
+- [🚀 Hướng dẫn Cài đặt & Khởi chạy](#-hướng-dẫn-cài-đặt--khởi-chạy)
+- [📊 Phân hệ Phân tích AI](#-phân-hệ-phân-tích-ai)
 
 ---
 
-## 📊 Định nghĩa các chỉ số: "% Khớp" và "% Vibe" là gì?
+## ✨ Tính năng Nổi bật
 
-Trong Tab "Đấu trường thuật toán", các con số % đại diện cho **Cosine Similarity** (Độ tương đồng Cosine). Tuy nhiên, bản chất của chúng hoàn toàn khác nhau tùy thuộc vào mô hình:
+Dự án được thiết kế với tư duy "Overkill" - vượt xa các hệ thống gợi ý thông thường:
 
-### 1. "% Khớp" (Áp dụng cho BoW, Jaccard, TF-IDF)
-* **Định nghĩa:** Là sự trùng lặp về **MẶT CHỮ (Lexical Match)**.
-* **Bản chất:** Nó đo lường xem hai game xài chung bao nhiêu từ vựng hoặc chung bao nhiêu cái Tag. Điểm % cao ở đây chỉ có nghĩa là người viết mô tả của 2 game này có "vốn từ vựng" giống hệt nhau.
+### 1. Phân hệ Ứng dụng: `app.py` (Giao diện Gamer)
+*   **Cyberpunk Dark Mode UI:** Giao diện tối ưu trải nghiệm người dùng với các hiệu ứng Neon, bảng màu đen nhám chuyên nghiệp.
+*   **Real-time Steam API:** Tự động lấy dữ liệu giá tiền (VNĐ), % Khuyến mãi và Ảnh bìa trực tiếp từ máy chủ Steam theo thời gian thực.
+*   **Diversity Quota (Bộ lọc Đa dạng hóa):** Khắc phục triệt để hiện tượng "Bong bóng lọc" (Echo Chamber) bằng cách:
+    *   🔵 Giới hạn tối đa 2 slot cho game cùng IP/Franchise.
+    *   � Ưu tiên tối thiểu 3 slot cho các tựa game mới lạ, độc lập.
 
-### 2. "% Vibe" (Áp dụng riêng cho LLM)
-* **Định nghĩa:** Là sự tương đồng về **NGỮ NGHĨA và KHÔNG KHÍ (Semantic Match)**.
-* **Bản chất toán học:** Cốt truyện của mỗi game được AI chuyển thành một điểm trong không gian tọa độ 384 chiều. `% Vibe` chính là độ hẹp của góc tạo bởi hai điểm đó. Góc càng nhỏ (Cosine tiến về 1), % Vibe càng cao.
-* **Ý nghĩa thực tiễn:** Hai game có thể không xài chung bất kỳ từ khóa nào, nhưng nếu nội dung của chúng đều nói về sự tuyệt vọng trong thế giới hoang tàn, AI sẽ xếp chúng ở cạnh nhau. Đó chính là "Vibe"!
+### 2. Phân hệ Phân tích: `superAnalyse.py` (Bảng điều khiển AI)
+*   **Score Drop-off Chart:** Đo lường mức độ "đuối sức" của thuật toán khi tìm kiếm đến Top 50.
+*   **Violin Plot:** Trực quan hóa độ nén không gian Vector, chứng minh cách LLM nhóm các game cùng "Vibe" hiệu quả hơn TF-IDF/BoW.
 
 ---
 
-## 🛠️ Hướng dẫn cài đặt (Localhost)
+## 🛠️ Công nghệ Sử dụng
 
-1. Clone repo này về máy.
-2. Cài đặt các thư viện cần thiết:
-   ```bash
-   pip install streamlit pandas numpy faiss-cpu scikit-learn sentence-transformers scipy requests
-3. Chạy ứng dụng Streamlit:
-   ```bash
-   streamlit run app.py
+| Thành phần | Công nghệ / Thư viện |
+| :--- | :--- |
+| **Giao diện** | Streamlit (Python-based Web Framework) |
+| **AI Model** | Sentence-Transformers (`all-MiniLM-L6-v2`) |
+| **Vector Search** | FAISS (Facebook AI Similarity Search) |
+| **Data Science** | Pandas, Numpy, Scikit-learn, Scipy |
+| **Visualization** | Plotly (Interactive Charts) |
+| **API** | Steam Web API (Requests) |
+
+---
+
+## 🧠 Cơ sở Toán học & Thuật toán
+
+Dự án là một đấu trường so sánh trực tiếp giữa **3 mô hình Lexical Match** (BoW, Jaccard, TF-IDF) và **1 mô hình Semantic Match** (LLM kết hợp FAISS).
+
+Tất cả các mô hình đều được đánh giá chung trên một hệ quy chiếu là **Độ tương đồng Cosine (Cosine Similarity)**:
+
+$$\text{sim}(A, B) = \cos(\theta) = \frac{A \cdot B}{||A|| ||B||}$$
+
+*   **% Khớp (Mô hình Cổ điển):** Đại diện cho sự trùng lặp về **MẶT CHỮ**. Điểm cao chỉ có nghĩa là người viết mô tả của 2 game có chung "vốn từ vựng".
+*   **% Vibe (Mô hình LLM):** Đại diện cho sự tương đồng về **NGỮ NGHĨA**. Cốt truyện được nén thành vector đặc 384 chiều. Góc $\theta$ giữa 2 vector càng nhỏ, 2 game càng có chung "Vibe" bối cảnh, dù không dùng chung bất kỳ từ khóa nào.
+
+---
+
+## � Cấu trúc Dự án
+
+```text
+d:\GameRec/
+├── app.py                # Ứng dụng chính cho người dùng (Gamer UI)
+├── superAnalyse.py       # Bảng điều khiển phân tích thuật toán (AI Analytics)
+├── steam_data_llm.csv    # Dataset thông tin game Steam
+├── faiss_llm_index.bin   # Index Vector cho tìm kiếm ngữ nghĩa siêu tốc
+├── *.pkl                 # Các model Vectorizer đã được train (BoW, TF-IDF, Jaccard)
+├── *.npz                 # Ma trận thưa (Sparse Matrix) lưu trữ đặc trưng game
+└── README.md             # Tài liệu dự án
+```
+
+---
+
+## 🚀 Hướng dẫn Cài đặt & Khởi chạy
+
+### Bước 1: Cài đặt môi trường
+Mở Terminal (PowerShell/CMD) và cài đặt các thư viện cần thiết:
+
+```bash
+pip install streamlit pandas numpy faiss-cpu scikit-learn sentence-transformers scipy requests plotly
+```
+
+### Bước 2: Khởi chạy ứng dụng
+Dự án chạy song song hai phân hệ trên hai cổng khác nhau:
+
+1.  **Giao diện Người dùng (Mặc định: Port 8501):**
+    ```bash
+    python -m streamlit run app.py
+    ```
+
+2.  **Giao diện Phân tích AI (Cổng 8502):**
+    ```bash
+    python -m streamlit run superAnalyse.py --server.port 8502
+    ```
+
+---
+
+## 📊 Phân hệ Phân tích AI
+
+Bảng điều khiển `superAnalyse.py` giúp bạn hiểu tại sao AI lại "thông minh" hơn:
+*   **Đường Line xanh (LLM):** Luôn đi ngang ở mức cao, chứng tỏ độ tự tin ổn định ngay cả khi tìm đến Top 50.
+*   **Đường Line đỏ/tím (BoW/TF-IDF):** Cắm đầu xuống đất nhanh chóng vì "cạn vốn từ".
+*   **Violin Plot:** Cho thấy LLM tạo ra các cụm (cluster) game cực kỳ đồng nhất về nội dung.
+
+---
+*Dự án được phát triển với mục tiêu học tập và nghiên cứu ứng dụng AI trong Hệ thống Gợi ý (Recommendation Systems).*
