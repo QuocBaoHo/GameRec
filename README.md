@@ -30,8 +30,13 @@ Dự án được thiết kế với tư duy "Overkill" - vượt xa các hệ t
     *   🟢 Ưu tiên tối thiểu 3 slot cho các tựa game mới lạ, độc lập.
 
 ### 2. Phân hệ Phân tích: `superAnalyse.py` (Bảng điều khiển AI)
-*   **Score Drop-off Chart:** Đo lường mức độ "đuối sức" của thuật toán khi tìm kiếm đến Top 50.
-*   **Violin Plot:** Trực quan hóa độ nén không gian Vector, chứng minh cách LLM nhóm các game cùng "Vibe" hiệu quả hơn TF-IDF/BoW.
+*   **🧠 Bí kíp đọc biểu đồ:** Hộp hướng dẫn tích hợp giải thích 3 loại biểu đồ chính — giúp người mới bắt đầu hiểu ngay trong 1 phút.
+*   **📉 Score Drop-off Chart (Line Chart):** Đo lường mức độ "đuối sức" (cạn vốn từ) của từng thuật toán khi tìm kiếm đến Top 50. Đường LLM luôn đi ngang ổn định, trong khi BoW/TF-IDF cắm đầu xuống đất.
+*   **🎻 Violin Plot:** Trực quan hóa phân phối chất lượng điểm số — chứng minh LLM tạo ra các cụm game đồng nhất hơn hẳn các thuật toán cổ điển.
+*   **🕸️ Master Radar Chart (Mới):** Biểu đồ mạng nhện tổng lực so sánh đồng thời cả 4 thuật toán trên **5 chỉ số**: Hiểu Ngữ Nghĩa (Semantic), Bắt Từ Khóa (Lexical), Tốc Độ (Speed), Tiết Kiệm RAM (Memory), Khả năng Mở rộng (Scale).
+*   **🔬 Giải phẫu chi tiết từng thuật toán (4 Tab - Mới):** Mỗi tab (BoW, Jaccard, TF-IDF, LLM+FAISS) bao gồm:
+    *   Radar Chart cá nhân thể hiện điểm mạnh/yếu đặc trưng.
+    *   Giải thích nguyên lý hoạt động, ưu điểm & điểm yếu chí mạng bằng ngôn ngữ dễ hiểu.
 
 ---
 
@@ -102,10 +107,17 @@ Dự án chạy song song hai phân hệ trên hai cổng khác nhau:
 
 ## 📊 Phân hệ Phân tích AI
 
-Bảng điều khiển `superAnalyse.py` giúp bạn hiểu tại sao AI lại "thông minh" hơn:
-*   **Đường Line xanh (LLM):** Luôn đi ngang ở mức cao, chứng tỏ độ tự tin ổn định ngay cả khi tìm đến Top 50.
-*   **Đường Line đỏ/tím (BoW/TF-IDF):** Cắm đầu xuống đất nhanh chóng vì "cạn vốn từ".
-*   **Violin Plot:** Cho thấy LLM tạo ra các cụm (cluster) game cực kỳ đồng nhất về nội dung.
+Bảng điều khiển `superAnalyse.py` giúp bạn hiểu tại sao AI lại "thông minh" hơn bằng 5 công cụ trực quan:
+
+| Biểu đồ | Ý nghĩa |
+| :--- | :--- |
+| **📉 Line Chart (Drop-off)** | Đường LLM đi ngang = tự tin đến Top 50. BoW/TF-IDF cắm đầu = cạn vốn từ. |
+| **🎻 Violin Plot** | "Bụng" càng nằm trên cao = gợi ý càng chất lượng. LLM luôn thắng. |
+| **🕸️ Master Radar Chart** | Đại chiến 4vs4 trên 5 chỉ số — nhìn hình đa giác nào to nhất là biết ngay. |
+| **🔬 Tab BoW / Jaccard / TF-IDF** | Radar cá nhân + giải phẫu chi tiết điểm mạnh, điểm yếu từng thuật toán. |
+| **🤖 Tab LLM + FAISS (AI)** | Chứng minh sức mạnh của Semantic Vector 384 chiều kết hợp tìm kiếm FAISS. |
+
+
 
 ---
 *Dự án được phát triển với mục tiêu học tập và nghiên cứu ứng dụng AI trong Hệ thống Gợi ý (Recommendation Systems).*

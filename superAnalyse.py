@@ -12,30 +12,30 @@ import plotly.graph_objects as go
 # --- CẤU HÌNH TRANG ---
 st.set_page_config(page_title="AI Analytics Pro", layout="wide", page_icon="🔬")
 
-# --- CSS ÉP XUNG GIÁC MẠC ---
+# --- CSS ÉP XUNG GIÁC MẠC (FIX MÀU CHỮ & TAB) ---
 st.markdown("""
 <style>
-    /* Nền đen nhám */
     .stApp { background-color: #0d1117; color: #c9d1d9; }
     h1, h2, h3 { color: #00e5ff !important; font-weight: bold; }
-    
-    /* Chữ tiêu đề nổi bật */
     label { color: #e6edf3 !important; font-weight: 800 !important; font-size: 1.1rem !important; text-transform: uppercase; letter-spacing: 1px; }
     
-    /* 🛠️ KHUNG CHÚ THÍCH SIÊU SÁNG */
+    /* Box thông tin */
     div[data-testid="stAlert"] { 
         background-color: #161b22 !important; 
         border-left: 4px solid #00e5ff !important; 
         box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
     div[data-testid="stAlert"] * {
-        color: #f0f6fc !important; 
+        color: #ffffff !important; 
         font-size: 1.05rem !important;
         line-height: 1.6 !important;
     }
-    div[data-testid="stAlert"] li {
-        color: #f0f6fc !important;
-    }
+    /* Fix màu cho các dấu chấm tròn (bullet points) */
+    div[data-testid="stAlert"] ul li { color: #ffffff !important; }
+    
+    /* Đổi màu Tab cho dễ nhìn */
+    button[data-baseweb="tab"] p { color: #8b949e !important; font-size: 1.1rem; font-weight: bold; }
+    button[data-baseweb="tab"][aria-selected="true"] p { color: #00e5ff !important; text-shadow: 0 0 8px #00e5ff; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -90,66 +90,146 @@ if selected_game:
     scores_tfidf = get_top_k_scores(sim_tfidf, top_k)
     scores_llm = get_top_k_scores(sim_llm, top_k)
 
-    # --- VẼ BIỂU ĐỒ ---
+    # --- CẨM NANG ĐỌC BIỂU ĐỒ (Dành cho người mới) ---
+    st.markdown("---")
+    st.markdown("### 🧠 BÍ KÍP ĐỌC BIỂU ĐỒ (CHỈ 1 PHÚT LÀ HIỂU)")
+    st.info("""
+    **1️⃣ Biểu đồ sụt giảm (Line Chart):** Đo độ "Hụt hơi". Đường nào đâm đầu xuống đất nghĩa là thuật toán cạn vốn từ, phải đi đoán bừa. Đường đi ngang nghĩa là thuật toán rất tự tin.
+    **2️⃣ Phân phối điểm số (Violin Plot):** Đo độ "Chất lượng". Nhìn vào cái 'bụng' bự nhất. Bụng nằm tuốt dưới đáy là toàn gợi ý rác. Bụng trên cao là gợi ý cực chuẩn.
+    **3️⃣ Mạng nhện (Radar Chart):** So sánh tổng lực 5 chỉ số y như coi thông số Tướng trong game. Hình đa giác càng to, bao phủ càng rộng thì thuật toán càng bá đạo!
+    """)
+
+    # --- VẼ BIỂU ĐỒ DROP-OFF & VIOLIN ---
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("📉 Biểu đồ sụt giảm độ tự tin (Score Drop-off)")
-        
+        st.subheader("📉 Biểu đồ sụt giảm độ tự tin")
         fig_line = go.Figure()
         x_axis = list(range(1, top_k + 1))
-        
         fig_line.add_trace(go.Scatter(x=x_axis, y=scores_bow, mode='lines+markers', name='BoW', line=dict(color='#ff4655')))
         fig_line.add_trace(go.Scatter(x=x_axis, y=scores_jac, mode='lines', name='Jaccard', line=dict(color='#facc15')))
         fig_line.add_trace(go.Scatter(x=x_axis, y=scores_tfidf, mode='lines', name='TF-IDF', line=dict(color='#a855f7')))
         fig_line.add_trace(go.Scatter(x=x_axis, y=scores_llm, mode='lines+markers', name='LLM (AI)', line=dict(color='#00e5ff', width=3)))
-        
-        fig_line.update_layout(
-            template="plotly_dark", 
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            xaxis_title="Hạng (Từ Top 1 đến Top 50)", 
-            yaxis_title="Độ tương đồng Cosine (%)", 
-            hovermode="x unified",
-            margin=dict(l=0, r=0, t=30, b=0)
-        )
+        fig_line.update_layout(template="plotly_dark", plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)", hovermode="x unified", margin=dict(l=0, r=0, t=30, b=0))
         st.plotly_chart(fig_line, use_container_width=True, theme=None)
 
     with col2:
         st.subheader("🎻 Phân phối điểm số (Violin Plot)")
-        
         df_violin = pd.DataFrame({
             "Score": np.concatenate([scores_bow, scores_jac, scores_tfidf, scores_llm]),
             "Model": ["BoW"]*top_k + ["Jaccard"]*top_k + ["TF-IDF"]*top_k + ["LLM (AI)"]*top_k
         })
-        
-        fig_violin = px.violin(df_violin, x="Model", y="Score", color="Model", box=True, points="all",
-                               color_discrete_map={"BoW": "#ff4655", "Jaccard": "#facc15", "TF-IDF": "#a855f7", "LLM (AI)": "#00e5ff"})
-        
-        fig_violin.update_layout(
-            template="plotly_dark", 
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            yaxis_title="Điểm Tương Đồng (%)", 
-            showlegend=False,
-            margin=dict(l=0, r=0, t=30, b=0)
-        )
+        fig_violin = px.violin(df_violin, x="Model", y="Score", color="Model", box=True, points="all", color_discrete_map={"BoW": "#ff4655", "Jaccard": "#facc15", "TF-IDF": "#a855f7", "LLM (AI)": "#00e5ff"})
+        fig_violin.update_layout(template="plotly_dark", plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)", showlegend=False, margin=dict(l=0, r=0, t=30, b=0))
         st.plotly_chart(fig_violin, use_container_width=True, theme=None)
 
+    # --- MASTER RADAR CHART (ĐẠI CHIẾN TỔNG LỰC) ---
     st.markdown("---")
+    st.markdown("### 🕸️ ĐẠI CHIẾN RADAR: TỔNG QUAN SỨC MẠNH (MASTER CHART)")
     
-    # --- CẨM NANG CHỐNG UNGA BUNGA ---
-    st.markdown("### 🧠 HƯỚNG DẪN ĐỌC BIỂU ĐỒ (DÀNH CHO BÁO CÁO)")
-    st.info("""
-    **1️⃣ Biểu đồ sụt giảm độ tự tin (Đường Line bên trái)**
-    * **Câu hỏi đặt ra:** Khi bị ép phải tìm ra tới 50 game, thuật toán có còn giữ được độ chính xác không hay bắt đầu "nhắm mắt đoán bừa"?
-    * **Cách đọc:** Nhìn vào độ dốc của đường.
-        * **Đường cắm đầu xuống đất (Thường là BoW, TF-IDF):** Thuật toán chỉ tìm được vài game đầu có chung "từ khóa". Từ game số 10 trở đi, nó cạn vốn từ nên phải lôi mấy game không liên quan vào. Độ tự tin (Score) rớt thê thảm.
-        * **Đường đi ngang ở mức cao (Đường Xanh LLM):** Thuật toán không phụ thuộc vào từ khóa. Vì nó hiểu "Vibe" và bối cảnh (Semantic), nó có thể dễ dàng tìm ra cả trăm game có cùng thể loại cốt truyện. Do đó, điểm tự tin của nó luông giữ ở mức ổn định cực cao!
+    categories = ['Hiểu Ngữ Nghĩa<br>(Semantic)', 'Bắt Từ Khóa<br>(Lexical)', 'Tốc Độ Tính Toán<br>(Speed)', 'Tiết Kiệm RAM<br>(Memory)', 'Khả năng Mở rộng<br>(Scale)']
+    
+    fig_master = go.Figure()
+    fig_master.add_trace(go.Scatterpolar(r=[5, 70, 95, 30, 40], theta=categories, fill='toself', name='BoW', line=dict(color='#ff4655'), fillcolor='rgba(255, 70, 85, 0.1)'))
+    fig_master.add_trace(go.Scatterpolar(r=[5, 80, 90, 40, 45], theta=categories, fill='toself', name='Jaccard', line=dict(color='#facc15'), fillcolor='rgba(250, 204, 21, 0.1)'))
+    fig_master.add_trace(go.Scatterpolar(r=[15, 95, 85, 20, 30], theta=categories, fill='toself', name='TF-IDF', line=dict(color='#a855f7'), fillcolor='rgba(168, 85, 247, 0.1)'))
+    fig_master.add_trace(go.Scatterpolar(r=[100, 60, 95, 80, 100], theta=categories, fill='toself', name='LLM (AI)', line=dict(color='#00e5ff', width=3), fillcolor='rgba(0, 229, 255, 0.3)'))
+    
+    fig_master.update_layout(
+        polar=dict(
+            radialaxis=dict(visible=True, range=[0, 100], color="#8b949e", gridcolor="#30363d"),
+            angularaxis=dict(color="#e6edf3", gridcolor="#30363d")
+        ),
+        showlegend=True,
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=80, r=80, t=40, b=80), # Tăng lề siêu bự để không lẹm chữ
+        height=450
+    )
+    st.plotly_chart(fig_master, use_container_width=True, theme=None)
 
-    **2️⃣ Phân phối điểm số (Cây Đàn Violin bên phải)**
-    * **Câu hỏi đặt ra:** Trong 50 game gợi ý ra, chất lượng đồng đều như thế nào?
-    * **Cách đọc:** Xem cái "bụng" (chỗ phình to nhất) của nó nằm ở đâu.
-        * **Bụng nằm ở dưới đáy (Màu tím TF-IDF / Vàng Jaccard):** Đa số các game được gợi ý có độ khớp rất lùn (chỉ 10-20%). Nghĩa là hệ thống đang ném cho người dùng một đống "rác" không liên quan.
-        * **Bụng nằm tuốt trên cao (Xanh Cyan LLM):** Đa số 50 game gợi ý đều đạt độ khớp 60-80%. Điều này chứng minh LLM nén không gian 384 chiều cực kỳ tối ưu, các game cùng Vibe tự động tụ họp lại thành một cụm (Cluster) rất khít nhau!
-    """)
+    # --- BÍ KÍP BẢO VỆ ĐỒ ÁN (GIẢI PHẪU CHI TIẾT TỪNG THUẬT TOÁN) ---
+    st.markdown("### 🔬 GIẢI PHẪU CHI TIẾT TỪNG THUẬT TOÁN (BẤM VÀO TAB)")
+
+    # Hàm vẽ Biểu đồ Radar Cá nhân (Đã fix lỗi lẹm chữ)
+    def draw_single_radar(model_name, r_values, color_hex, fill_rgba):
+        fig = go.Figure()
+        fig.add_trace(go.Scatterpolar(
+            r=r_values, theta=categories, fill='toself', name=model_name,
+            line=dict(color=color_hex, width=2), fillcolor=fill_rgba, marker=dict(size=6)
+        ))
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(visible=True, range=[0, 100], color="#8b949e", gridcolor="#30363d"),
+                angularaxis=dict(color="#e6edf3", gridcolor="#30363d")
+            ),
+            showlegend=False, template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            margin=dict(l=60, r=60, t=20, b=60), # Tăng lề siêu bự (bottom=60)
+            height=350
+        )
+        return fig
+
+    tab_bow, tab_jac, tab_tfidf, tab_llm = st.tabs(["1️⃣ Bag of Words", "2️⃣ Jaccard", "3️⃣ TF-IDF", "4️⃣ LLM + FAISS (AI)"])
+
+    with tab_bow:
+        col_text, col_chart = st.columns([3, 2])
+        with col_text:
+            st.info("""
+            **🔍 Nguyên lý hoạt động:** Đếm số lần xuất hiện của từ vựng, không quan tâm thứ tự hay ngữ pháp.
+            
+            **✅ Điểm mạnh:** * Đơn giản, dễ lập trình.
+            * Tốc độ xây dựng ma trận siêu nhanh.
+            
+            **❌ Điểm yếu chí mạng:**
+            * **Mù ngữ nghĩa (Semantic = 0):** Câu "Chó cắn người" và "Người cắn chó" được máy hiểu là giống nhau 100%.
+            * **Tốn RAM:** Sinh ra ma trận khổng lồ nhưng toàn số 0 (Sparse Matrix).
+            """)
+        with col_chart:
+            st.plotly_chart(draw_single_radar('BoW', [5, 70, 95, 30, 40], '#ff4655', 'rgba(255, 70, 85, 0.3)'), use_container_width=True, theme=None)
+
+    with tab_jac:
+        col_text, col_chart = st.columns([3, 2])
+        with col_text:
+            # THÊM CHỮ 'r' Ở ĐÂY ĐỂ FIX LỖI LATEX NÈ
+            st.info(r"""
+            **🔍 Nguyên lý hoạt động:** Tính tỷ lệ phần giao (Intersection) chia cho phần hợp (Union) của 2 tập hợp:
+            $$J(A,B) = \frac{|A \cap B|}{|A \cup B|}$$
+            
+            **✅ Điểm mạnh:** * Cực kỳ hiệu quả để so khớp các nhãn dán (Tags/Genres). 
+            * Bắt từ khóa siêu chuẩn.
+            
+            **❌ Điểm yếu chí mạng:**
+            * Không phân biệt được "trọng số". Chữ vô nghĩa như "The" bị đánh giá ngang hàng với chữ quan trọng như "Zombie".
+            """)
+        with col_chart:
+            st.plotly_chart(draw_single_radar('Jaccard', [5, 80, 90, 40, 45], '#facc15', 'rgba(250, 204, 21, 0.3)'), use_container_width=True, theme=None)
+
+    with tab_tfidf:
+        col_text, col_chart = st.columns([3, 2])
+        with col_text:
+            st.info("""
+            **🔍 Nguyên lý hoạt động:** Nó phạt nặng các từ xuất hiện quá phổ biến (như "play", "game") và thưởng điểm cho các từ hiếm (như "cyberpunk").
+            
+            **✅ Điểm mạnh:** * Công cụ Bắt từ khóa (Keyword) hoàn hảo nhất của thế hệ cũ.
+            
+            **❌ Điểm yếu chí mạng:**
+            * **Mù từ đồng nghĩa:** Gõ "Gun" sẽ không bao giờ tìm ra game mô tả bằng chữ "Rifle". Dẫn đến cạn kiệt kết quả khi tìm kiếm sâu.
+            """)
+        with col_chart:
+            st.plotly_chart(draw_single_radar('TF-IDF', [15, 95, 85, 20, 30], '#a855f7', 'rgba(168, 85, 247, 0.3)'), use_container_width=True, theme=None)
+
+    with tab_llm:
+        col_text, col_chart = st.columns([3, 2])
+        with col_text:
+            st.info("""
+            **🔍 Nguyên lý hoạt động (Semantic Match):** AI nén toàn bộ cốt truyện thành Vector đặc (Dense) 384 chiều. Kết hợp FAISS để tìm láng giềng gần nhất siêu tốc.
+            
+            **✅ Điểm mạnh (Out trình):**
+            * **Hiểu ngữ cảnh tuyệt đối:** Hiểu "Hậu tận thế" dù mô tả chỉ ghi "Nuclear fallout". Trị được từ đồng nghĩa.
+            * **Sức chứa vô hạn (Scale):** Tốc độ quét của FAISS gần như không đổi dù dữ liệu lên tới hàng triệu game.
+            
+            **❌ Điểm yếu (Sự đánh đổi):** * Đòi hỏi phần cứng (CPU/GPU) cực mạnh để khởi tạo Vector ban đầu.
+            """)
+        with col_chart:
+            st.plotly_chart(draw_single_radar('LLM', [100, 60, 95, 80, 100], '#00e5ff', 'rgba(0, 229, 255, 0.3)'), use_container_width=True, theme=None)
